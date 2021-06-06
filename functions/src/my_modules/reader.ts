@@ -1,7 +1,7 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import {algoliaClient} from './algolia';
-import {deleteDoc, fetchFromFirestore, saveToFirebase} from './helpers';
+import {deleteDoc, fetchFromFirestore, saveToFirebase} from '../myutils/helpers';
 
 export const onSaveReader = functions.firestore
     .document('readers/{uid}/profile-data/profile').onWrite(

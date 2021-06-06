@@ -1,7 +1,7 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 
-import {saveToFirebase} from './helpers';
+import {saveToFirebase} from '../myutils/helpers';
 
 export const uploadToTimelines = functions.https.onCall(
     async (data, context) => {

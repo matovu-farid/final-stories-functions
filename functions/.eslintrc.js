@@ -16,5 +16,15 @@ module.exports = {
   ],
   'rules': {
     'max-len': ['error', {'code': 120}],
+    "require-jsdoc": ["error", {
+      "require": {
+          "FunctionDeclaration": false,
+          "MethodDefinition": false,
+          "ClassDeclaration": false,
+          "ArrowFunctionExpression": false,
+          "FunctionExpression": false
+      }}]
+    
   },
+  
 };

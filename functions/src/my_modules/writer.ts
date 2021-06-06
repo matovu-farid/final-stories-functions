@@ -1,6 +1,6 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import {deleteDoc, fetchFromFirestore, saveToFirebase} from './helpers';
+import {deleteDoc, fetchFromFirestore, saveToFirebase} from '../myutils/helpers';
 import {algoliaClient} from './algolia';
 
 export const saveWriterName = functions.https.onCall(

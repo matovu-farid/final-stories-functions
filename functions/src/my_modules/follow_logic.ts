@@ -1,6 +1,6 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import {deleteDoc, saveToFirebase} from './helpers';
+import {deleteDoc, saveToFirebase} from '../myutils/helpers';
 
 export const follow = functions.https.onCall((data, context) => {
   const follower = data.follower.uid;

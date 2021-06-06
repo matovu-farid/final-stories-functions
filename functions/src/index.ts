@@ -9,3 +9,4 @@ export * from './my_modules/on';
 export * from './my_modules/reader';
 export * from './my_modules/timeline';
 export * from './my_modules/writer';
+export * from './my_modules/grant';
