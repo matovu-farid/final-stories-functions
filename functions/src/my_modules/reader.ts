@@ -1,7 +1,7 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import {algoliaClient} from './algolia';
-import {deleteDoc, fetchFromFirestore, saveToFirebase} from '../myutils/helpers';
+import {deleteDoc, fetchFromFirestore, fetchQuery, saveToFirebase} from '../myutils/helpers';
 
 export const onSaveReader = functions.firestore
     .document('readers/{uid}/profile-data/profile').onWrite(
@@ -32,6 +32,36 @@ export const saveReaderName = functions.https.onCall(
       else ref.update({name: data});
     },
 );
+
+export const getFirstReaderArticles = functions.https.onCall(
+  async (uid,context)=>{
+    const ref = admin.firestore().collection(`readers/${uid}/timeline`)
+
+    if((await ref.get()).empty)return;
+    const query = ref
+    .orderBy('createdAt','desc').limit(5)
+    
+    
+     return fetchQuery(query)
+
+  }
+)
+/**
+ * data should contain a groupId and the article
+ */
+export const getNextReaderArticles = functions.https.onCall(
+  async (data,context)=>{
+    const {uid,article} = data;
+    const ref = admin.firestore().collection(`readers/${uid}/timeline`)
+    if((await ref.get()).empty)return;
+    const query = ref
+    .orderBy('createdAt','desc').startAfter(article.createdAt).limit(5);
+
+    return fetchQuery(query)
+
+  }
+)
+
 
 export const thisReaderProfile = functions.https.onCall(
     (data, context) => {
