@@ -1,37 +1,39 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 
-const addGroupId = (groupId:any, requesterUid:any)=>{
-  const auth = admin.auth();
-  return auth.setCustomUserClaims(requesterUid, {
-    groupIds: groupId,
-  });
-};
-
-export const grandAminRight = functions.https.onCall(
-    async (data, context)=>{
-      const groupId = data.groupId;
-      const requesterUid = data.requesterUid;
-      // the group id is in this token if you are an admin
-      const isAdminGroupIds= context.auth?.token.groupIds;
 
 
-      if (isAdminGroupIds && isAdminGroupIds[`${groupId}`]) {
-        const auth = admin.auth();
-        let claims= (await auth.getUser(requesterUid)).customClaims;
-        if (!claims) return addGroupId(groupId, requesterUid);
+export const grantEditorRole =
+(context:functions.https.CallableContext)=>{
+  const auth = context.auth;
+  if(auth){
+    return admin.auth().setCustomUserClaims(auth.uid,{'editor':true})
+    
+  }else return Promise.reject(Error('You have not logged in'))
+  
+}
 
-        else {
-          claims = claims!;
-          let currentGroupIds : any | undefined = claims.groupIds;
-          if (!currentGroupIds) return addGroupId(groupId, requesterUid);
-          else {
-            currentGroupIds = currentGroupIds!;
-            if (!currentGroupIds[`${groupId}`]) return addGroupId(groupId, requesterUid);
-            else return;
-          }
-        }
-      }
-    },
-);
+export const grantAdminRole = (context:functions.https.CallableContext)=>{
+  const auth = context.auth;
+  if(auth){
+    return admin.auth().setCustomUserClaims(auth.uid,{'admin':true})
+  }else return Promise.reject(Error('You have not logged in'))
+  
+}
+export const revokeEditorRole =
+(context:functions.https.CallableContext)=>{
+  const auth = context.auth;
+  if(auth){
+    return admin.auth().setCustomUserClaims(auth.uid,{'editor':false})
+    
+  }else return Promise.reject(Error('You have not logged in'))
+  
+}
 
+export const revokeAdminRole = (context:functions.https.CallableContext)=>{
+  const auth = context.auth;
+  if(auth){
+    return admin.auth().setCustomUserClaims(auth.uid,{'admin':false})
+  }else return Promise.reject(Error('You have not logged in'))
+  
+}

@@ -1,4 +1,5 @@
 import * as functions from 'firebase-functions';
+import * as admin from 'firebase-admin';
 
 /**
  * This is the data from the document snapshot recieves
@@ -37,3 +38,4 @@ export type Context = functions.EventContext;
  */
 export type QueryDocumentSnapshot = functions.firestore.QueryDocumentSnapshot;
 
+export type FieldValue = admin.firestore.FieldValue;

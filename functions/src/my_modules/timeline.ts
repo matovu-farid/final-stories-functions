@@ -9,7 +9,7 @@ export const uploadToTimelines = functions.https.onCall(
       const promises : Promise<any>[] = [];
       const followersSnapshot = await admin.firestore()
           .collection(`writers/${uid}/followers`).get();
-          
+
       if (!followersSnapshot.empty) {
         followersSnapshot.forEach((doc) => {
           const uid = doc.id;

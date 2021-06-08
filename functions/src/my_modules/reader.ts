@@ -1,27 +1,8 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import {algoliaClient} from './algolia';
+
 import {deleteDoc, fetchFromFirestore, fetchQuery, saveToFirebase} from '../myutils/helpers';
 
-export const onSaveReader = functions.firestore
-    .document('readers/{uid}/profile-data/profile').onWrite(
-        (change, context) => {
-          const reader = change.after.data()!;
-          reader.objectID = context.params.uid;
-          const readersIndex = algoliaClient().initIndex('readers');
-
-          return readersIndex.saveObject(reader);
-        },
-    );
-
-export const onDeleteReader = functions.firestore
-    .document('reader/{uid}/profile-data/profile').onDelete(
-        (snapshot, context) => {
-          const oldId = snapshot.id;
-          const readersIndex = algoliaClient().initIndex('reader');
-          return readersIndex.deleteObject(oldId);
-        },
-    );
 
 export const saveReaderName = functions.https.onCall(
     async (data, context) => {
@@ -34,33 +15,30 @@ export const saveReaderName = functions.https.onCall(
 );
 
 export const getFirstReaderArticles = functions.https.onCall(
-  async (uid,context)=>{
-    const ref = admin.firestore().collection(`readers/${uid}/timeline`)
+    async (uid, context)=>{
+      const ref = admin.firestore().collection(`readers/${uid}/timeline`);
 
-    if((await ref.get()).empty)return;
-    const query = ref
-    .orderBy('createdAt','desc').limit(5)
-    
-    
-     return fetchQuery(query)
+      if ((await ref.get()).empty) return;
+      const query = ref.orderBy('createdAt', 'desc').limit(5);
 
-  }
-)
+
+      return fetchQuery(query);
+    },
+);
 /**
- * data should contain a groupId and the article
+ * data should contain a uid and the article
  */
 export const getNextReaderArticles = functions.https.onCall(
-  async (data,context)=>{
-    const {uid,article} = data;
-    const ref = admin.firestore().collection(`readers/${uid}/timeline`)
-    if((await ref.get()).empty)return;
-    const query = ref
-    .orderBy('createdAt','desc').startAfter(article.createdAt).limit(5);
+    async (data, context)=>{
+      const {uid, article} = data;
+      const ref = admin.firestore().collection(`readers/${uid}/timeline`);
+      if ((await ref.get()).empty) return;
+      const query = ref
+          .orderBy('createdAt', 'desc').startAfter(article.createdAt).limit(5);
 
-    return fetchQuery(query)
-
-  }
-)
+      return fetchQuery(query);
+    },
+);
 
 
 export const thisReaderProfile = functions.https.onCall(
@@ -83,7 +61,7 @@ export const deleteReader = functions.https.onCall(
     (data, context) => {
       const uid = context.auth?.uid;
 
-      const profileRef = admin.firestore().doc(`readers/${uid}/profile-data/profile`);
+      const profileRef = admin.firestore().doc(`readers/${uid}`);
       return deleteDoc(profileRef);
     },
 );

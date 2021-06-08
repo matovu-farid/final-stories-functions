@@ -1,22 +1,22 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import {Context, DocumentSnapshot, DocumentReference, QueryDocumentSnapshot, Changer} from '../../myutils/mytypes';
+import {Context, DocumentSnapshot, DocumentReference} from '../../myutils/mytypes';
 import {algoliaClient} from '../algolia';
 
-export const setClaim=async (snapshot:functions.firestore.QueryDocumentSnapshot
-    , context:functions.EventContext)=>{
-  const adminUid = snapshot.data().groupAdmin.uid;
-  const user = await admin.auth().getUser(adminUid);
-  const groupUid = context.params.uid;
+// export const setClaim=async (snapshot:functions.firestore.QueryDocumentSnapshot
+//     , context:functions.EventContext)=>{
+//   const adminUid = snapshot.data().groupAdmin.uid;
+//   const user = await admin.auth().getUser(adminUid);
+//   const groupUid = context.params.uid;
 
-  const currentGroupIds = user.customClaims?.groupIds as Array<String>;
+//   const currentGroupIds = user.customClaims?.groupIds as Array<String>;
 
 
-  if (currentGroupIds) {
-    currentGroupIds.push(`${groupUid}`);
-    return admin.auth().setCustomUserClaims(adminUid, {groupIds: currentGroupIds});
-  } else return admin.auth().setCustomUserClaims(adminUid, {groupIds: [`${groupUid}`]});
-};
+//   if (currentGroupIds) {
+//     currentGroupIds.push(`${groupUid}`);
+//     return admin.auth().setCustomUserClaims(adminUid, {groupIds: currentGroupIds});
+//   } else return admin.auth().setCustomUserClaims(adminUid, {groupIds: [`${groupUid}`]});
+// };
 export const onCreateArtricle = (
     context: functions.EventContext, type: string, collection: string,
 ) => {
@@ -56,13 +56,7 @@ export function increaseFolowersAdFollowing(
       .update({following: admin.firestore.FieldValue.increment(1)}),
   ]);
 }
-export function sendArticlesToAlgolia(context: Context, snapshot: QueryDocumentSnapshot) {
-  const {uid} = context.params;
-  const index = algoliaClient().initIndex(`${uid}-articles`);
-  const data = snapshot.data();
-  data.objectID = context.params.articleId;
-  return index.saveObject(data);
-}
+
 /**
  *
  * @param {Changer} change the shange object returned from
@@ -71,12 +65,26 @@ export function sendArticlesToAlgolia(context: Context, snapshot: QueryDocumentS
  * that gives its parameters
  * @return {Promise<void>} complete with nada
  */
-export function sendGroupToAlgolia(change: Changer, context: Context) {
-  const data = change.after.data()!;
+export function sendGroupToAlgolia(data: FirebaseFirestore.DocumentData, context: Context) {
+ 
   const groupsIndex = algoliaClient().initIndex('groups');
   const {uid} = context.params;
   data.objectID = uid;
   return groupsIndex.saveObject(data);
+}
+
+export function incrementSummaryArticles(context: functions.EventContext) {
+  const uid = context.params.uid;
+  const ref = admin.firestore().doc(`writers/${uid}/profile-data/summary`);
+
+  return ref.update({noOfArticles: admin.firestore.FieldValue.increment(1)});
+}
+
+export function decreaseSummaryArticles(context: functions.EventContext) {
+  const uid = context.params.uid;
+  const ref = admin.firestore().doc(`writers/${uid}/profile-data/summary`);
+
+  return ref.update({noOfArticles: admin.firestore.FieldValue.increment(-1)});
 }
 
 
